@@ -72,6 +72,7 @@ function A({ to, hook, variant = 'default', children, isExternal, ...props }) {
       {isExternal && (
         <span className="text-ds-gray-quinary">
           <Icon size="sm" name="external-link" />
+          <Icon size="sm" name="external-link" />
         </span>
       )}
     </a>
