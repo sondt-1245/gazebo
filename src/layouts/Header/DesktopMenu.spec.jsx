@@ -215,6 +215,13 @@ describe('DesktopMenu', () => {
     })
     expect(blogLink).toBeInTheDocument()
     expect(blogLink).toHaveAttribute('href', 'https://about.codecov.io/blog')
+
+    const feedback = await screen.findByText('Feedback')
+    expect(feedback).toBeInTheDocument()
+    expect(feedback).toHaveAttribute(
+      'href',
+      'https://github.com/codecov/feedback/discussions'
+    )
   })
 
   it('renders the dropdown when user is logged in', async () => {
@@ -265,38 +272,6 @@ describe('DesktopMenu', () => {
     expect(login).toBeInTheDocument()
   })
 
-  it('does not render the feedback link when user is not logged in', async () => {
-    setup({ hasLoggedInUser: false })
-
-    render(<DesktopMenu />, {
-      wrapper: wrapper({
-        initialEntries: '/gh/',
-        path: '/:provider/',
-      }),
-    })
-
-    await waitFor(() => queryClient.isFetching)
-    await waitFor(() => !queryClient.isFetching)
-
-    const feedbackLink = screen.queryByText('feedback')
-    expect(feedbackLink).toBeNull()
-  })
-
-  it('renders the feedback link when user is logged in', async () => {
-    setup()
-
-    render(<DesktopMenu />, {
-      wrapper: wrapper({
-        initialEntries: '/gh/',
-        path: '/:provider/',
-      }),
-    })
-
-    const feedback = await screen.findByText('Feedback')
-    expect(feedback).toBeInTheDocument()
-    expect(feedback).toHaveAttribute('href', '/gh/feedback')
-  })
-
   describe('when running in self hosted mode', () => {
     it('renders the seat count when user is logged in', async () => {
       config.IS_SELF_HOSTED = true
@@ -341,7 +316,7 @@ describe('LoginPrompt', () => {
       expect(loginLink).toBeInTheDocument()
       expect(loginLink).toHaveAttribute(
         'href',
-        'https://stage-web.codecov.dev/login/gh?to=http%3A%2F%2Flocalhost%2F'
+        '/login/gh?to=http%3A%2F%2Flocalhost%2F'
       )
 
       const signUpLink = within(loginPrompt).getByText('Sign up')

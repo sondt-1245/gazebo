@@ -7,10 +7,8 @@ import { usePullPageData } from './usePullPageData'
 
 const mockPullData = {
   owner: {
-    isCurrentUserPartOfOrg: true,
     repository: {
       __typename: 'Repository',
-      private: true,
       pull: {
         pullId: 1,
         head: {
@@ -31,7 +29,6 @@ const mockPullData = {
 
 const mockNotFoundError = {
   owner: {
-    isCurrentUserPartOfOrg: true,
     repository: {
       __typename: 'NotFoundError',
       message: 'commit not found',
@@ -41,12 +38,15 @@ const mockNotFoundError = {
 
 const mockOwnerNotActivatedError = {
   owner: {
-    isCurrentUserPartOfOrg: true,
     repository: {
       __typename: 'OwnerNotActivatedError',
       message: 'owner not activated',
     },
   },
+}
+
+const mockNullOwner = {
+  owner: null,
 }
 
 const mockUnsuccessfulParseError = {}
@@ -77,6 +77,7 @@ interface SetupArgs {
   isNotFoundError?: boolean
   isOwnerNotActivatedError?: boolean
   isUnsuccessfulParseError?: boolean
+  isNullOwner?: boolean
 }
 
 describe('usePullPageData', () => {
@@ -84,6 +85,7 @@ describe('usePullPageData', () => {
     isNotFoundError = false,
     isOwnerNotActivatedError = false,
     isUnsuccessfulParseError = false,
+    isNullOwner = false,
   }: SetupArgs) {
     server.use(
       graphql.query('PullPageData', (req, res, ctx) => {
@@ -93,6 +95,8 @@ describe('usePullPageData', () => {
           return res(ctx.status(200), ctx.data(mockOwnerNotActivatedError))
         } else if (isUnsuccessfulParseError) {
           return res(ctx.status(200), ctx.data(mockUnsuccessfulParseError))
+        } else if (isNullOwner) {
+          return res(ctx.status(200), ctx.data(mockNullOwner))
         } else {
           return res(ctx.status(200), ctx.data(mockPullData))
         }
@@ -102,44 +106,73 @@ describe('usePullPageData', () => {
 
   describe('calling hook', () => {
     describe('repository __typename of Repository', () => {
-      it('returns the correct data', async () => {
-        setup({})
+      describe('there is data', () => {
+        it('returns the correct data', async () => {
+          setup({})
 
-        const { result } = renderHook(
-          () =>
-            usePullPageData({
-              provider: 'gh',
-              owner: 'codecov',
-              repo: 'cool-repo',
-              pullId: '1',
-            }),
-          {
-            wrapper,
-          }
-        )
+          const { result } = renderHook(
+            () =>
+              usePullPageData({
+                provider: 'gh',
+                owner: 'codecov',
+                repo: 'cool-repo',
+                pullId: '1',
+              }),
+            {
+              wrapper,
+            }
+          )
 
-        await waitFor(() => result.current.isLoading)
-        await waitFor(() => !result.current.isLoading)
+          await waitFor(() => result.current.isLoading)
+          await waitFor(() => !result.current.isLoading)
 
-        await waitFor(() =>
-          expect(result.current.data).toStrictEqual({
-            hasAccess: true,
-            pull: {
-              pullId: 1,
-              head: {
-                commitid: '123',
+          await waitFor(() =>
+            expect(result.current.data).toStrictEqual({
+              pull: {
+                pullId: 1,
+                head: {
+                  commitid: '123',
+                },
+                compareWithBase: {
+                  __typename: 'Comparison',
+                  impactedFilesCount: 4,
+                  indirectChangedFilesCount: 0,
+                  flagComparisonsCount: 1,
+                  componentComparisonsCount: 6,
+                  directChangedFilesCount: 0,
+                },
               },
-              compareWithBase: {
-                __typename: 'Comparison',
-                impactedFilesCount: 4,
-                indirectChangedFilesCount: 0,
-                flagComparisonsCount: 1,
-                componentComparisonsCount: 6,
-                directChangedFilesCount: 0,
-              },
-            },
-          })
-        )
+            })
+          )
+        })
+      })
+
+      describe('there is no data', () => {
+        it('returns the correct data', async () => {
+          setup({ isNullOwner: true })
+
+          const { result } = renderHook(
+            () =>
+              usePullPageData({
+                provider: 'gh',
+                owner: 'codecov',
+                repo: 'cool-repo',
+                pullId: '1',
+              }),
+            {
+              wrapper,
+            }
+          )
+
+          await waitFor(() => result.current.isLoading)
+          await waitFor(() => !result.current.isLoading)
+
+          await waitFor(() =>
+            expect(result.current.data).toStrictEqual({
+              pull: null,
+            })
+          )
+        })
       })
     })
 

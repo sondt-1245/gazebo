@@ -9,13 +9,16 @@ function defaultLinks({ internalAccessTab }) {
   return [
     ...(internalAccessTab ? [{ pageName: internalAccessTab }] : []),
     { pageName: 'yamlTab' },
-    { pageName: 'orgUploadToken' },
   ]
 }
 
 function selfHostedOverrideLinks({ isPersonalSettings }) {
+  let internalAccessTab =
+    !config.HIDE_ACCESS_TAB && isPersonalSettings ? 'internalAccessTab' : null
+
   return [
     { pageName: isPersonalSettings ? 'profile' : '', exact: true },
+    ...(internalAccessTab ? [{ pageName: internalAccessTab }] : []),
     { pageName: 'yamlTab' },
   ]
 }

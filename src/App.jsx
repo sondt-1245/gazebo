@@ -18,13 +18,13 @@ const AdminSettings = lazy(() => import('./pages/AdminSettings'))
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
 const CommitDetailPage = lazy(() => import('./pages/CommitDetailPage'))
 const EnterpriseLandingPage = lazy(() => import('pages/EnterpriseLandingPage'))
-const FeedbackPage = lazy(() => import('./pages/FeedbackPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const MembersPage = lazy(() => import('./pages/MembersPage'))
 const PlanPage = lazy(() => import('./pages/PlanPage'))
 const OwnerPage = lazy(() => import('./pages/OwnerPage'))
 const PullRequestPage = lazy(() => import('./pages/PullRequestPage'))
 const RepoPage = lazy(() => import('./pages/RepoPage'))
+const SyncProviderPage = lazy(() => import('./pages/SyncProviderPage'))
 
 const HomePageRedirect = () => {
   const { provider } = useParams()
@@ -53,6 +53,11 @@ const MainAppRoutes = () => (
     <SentryRoute path="/account/:provider/:owner">
       <BaseLayout>
         <AccountSettings />
+      </BaseLayout>
+    </SentryRoute>
+    <SentryRoute path="/sync" exact>
+      <BaseLayout>
+        <SyncProviderPage />
       </BaseLayout>
     </SentryRoute>
     {config.IS_SELF_HOSTED && (
@@ -91,11 +96,6 @@ const MainAppRoutes = () => (
     <SentryRoute path="/:provider" exact>
       <BaseLayout>
         <HomePageRedirect />
-      </BaseLayout>
-    </SentryRoute>
-    <SentryRoute path="/:provider/feedback">
-      <BaseLayout>
-        <FeedbackPage />
       </BaseLayout>
     </SentryRoute>
     <SentryRoute path="/:provider/:owner" exact>

@@ -18,6 +18,7 @@ const queryClient = new QueryClient({
 const server = setupServer()
 
 const mockMainBranchSearch = {
+  __typename: 'Repository',
   branches: {
     edges: [
       {
@@ -37,6 +38,7 @@ const mockMainBranchSearch = {
 }
 
 const mockBranches = {
+  __typename: 'Repository',
   branches: {
     edges: [
       {
@@ -66,6 +68,7 @@ const mockBranches = {
 const mockBranch = (branchName: string) => ({
   owner: {
     repository: {
+      __typename: 'Repository',
       branch: {
         name: branchName,
         head: {
@@ -120,7 +123,7 @@ describe('useCommitsTabBranchSelector', () => {
           return res(ctx.status(200), ctx.data(mockBranch(branchName)))
         }
 
-        return res(ctx.status(200), ctx.data({}))
+        return res(ctx.status(200), ctx.data({ owner: null }))
       }),
       graphql.query('GetBranches', (req, res, ctx) => {
         if (hasNoBranches) {

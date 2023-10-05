@@ -20,6 +20,7 @@ const mockRepoOverview = {
 }
 
 const mockMainBranchSearch = {
+  __typename: 'Repository',
   branches: {
     edges: [
       {
@@ -48,6 +49,7 @@ const mockBranch = {
 }
 
 const mockBranches = (hasNextPage = false) => ({
+  __typename: 'Repository',
   branches: {
     edges: [
       {
@@ -167,7 +169,12 @@ describe('Summary', () => {
         )
       ),
       graphql.query('GetBranch', (req, res, ctx) =>
-        res(ctx.status(200), ctx.data({ owner: { repository: mockBranch } }))
+        res(
+          ctx.status(200),
+          ctx.data({
+            owner: { repository: { __typename: 'Repository', ...mockBranch } },
+          })
+        )
       ),
       graphql.query('GetBranches', (req, res, ctx) => {
         if (req.variables?.after) {

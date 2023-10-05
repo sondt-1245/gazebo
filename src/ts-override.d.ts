@@ -1,4 +1,10 @@
 declare module '*.svg' {
-  const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>
-  export default content
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGAttributes<SVGElement>
+  >
+}
+
+declare module '*.png' {
+  const value: any
+  export = value
 }

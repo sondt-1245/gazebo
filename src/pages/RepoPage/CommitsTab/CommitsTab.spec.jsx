@@ -34,6 +34,7 @@ afterAll(() => {
 const mockBranches = (hasNextPage = false) => ({
   owner: {
     repository: {
+      __typename: 'Repository',
       branches: {
         edges: [
           {
@@ -47,7 +48,7 @@ const mockBranches = (hasNextPage = false) => ({
         ],
         pageInfo: {
           hasNextPage,
-          endCursor: hasNextPage ? 'some cursor' : undefined,
+          endCursor: hasNextPage ? 'some cursor' : null,
         },
       },
     },
@@ -79,6 +80,7 @@ const mockOverview = {
 const mockBranch = (branchName) => ({
   owner: {
     repository: {
+      __typename: 'Repository',
       branch: {
         name: branchName,
         head: {
@@ -110,7 +112,7 @@ describe('CommitsTab', () => {
         if (hasBranches) {
           return res(
             ctx.status(200),
-            ctx.data({ owner: { repository: { branches: {} } } })
+            ctx.data({ owner: { repository: { branches: null } } })
           )
         }
 
@@ -135,7 +137,7 @@ describe('CommitsTab', () => {
           return res(ctx.status(200), ctx.data(mockBranch(returnBranch)))
         }
 
-        return res(ctx.status(200), ctx.data({}))
+        return res(ctx.status(200), ctx.data({ owner: null }))
       }),
       graphql.query('GetRepo', (req, res, ctx) =>
         res(ctx.status(200), ctx.data({}))

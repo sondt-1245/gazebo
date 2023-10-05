@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
 import {
+  FirstPullRequestSchema,
   MissingBaseCommitSchema,
   MissingBaseReportSchema,
   MissingComparisonSchema,
@@ -13,12 +14,10 @@ import {
   RepoOwnerNotActivatedErrorSchema,
 } from 'services/repo'
 import Api from 'shared/api'
-import { userHasAccess } from 'shared/utils/user'
 import A from 'ui/A'
 
 const RepositorySchema = z.object({
   __typename: z.literal('Repository'),
-  private: z.boolean(),
   pull: z
     .object({
       pullId: z.number().nullable(),
@@ -37,6 +36,7 @@ const RepositorySchema = z.object({
             flagComparisonsCount: z.number(),
             componentComparisonsCount: z.number(),
           }),
+          FirstPullRequestSchema,
           MissingBaseCommitSchema,
           MissingBaseReportSchema,
           MissingComparisonSchema,
@@ -49,22 +49,25 @@ const RepositorySchema = z.object({
 })
 
 const PullPageDataSchema = z.object({
-  isCurrentUserPartOfOrg: z.boolean(),
-  repository: z.discriminatedUnion('__typename', [
-    RepositorySchema,
-    RepoNotFoundErrorSchema,
-    RepoOwnerNotActivatedErrorSchema,
-  ]),
+  owner: z
+    .object({
+      repository: z
+        .discriminatedUnion('__typename', [
+          RepositorySchema,
+          RepoNotFoundErrorSchema,
+          RepoOwnerNotActivatedErrorSchema,
+        ])
+        .nullable(),
+    })
+    .nullable(),
 })
 
 const query = `
 query PullPageData($owner: String!, $repo: String!, $pullId: Int!) {
   owner(username: $owner) {
-    isCurrentUserPartOfOrg
     repository(name: $repo) {
       __typename
       ... on Repository {
-        private
         pull(id: $pullId) {
           pullId
           head {
@@ -78,6 +81,9 @@ query PullPageData($owner: String!, $repo: String!, $pullId: Int!) {
               directChangedFilesCount
               flagComparisonsCount
               componentComparisonsCount
+            }
+            ... on FirstPullRequest {
+              message
             }
             ... on MissingBaseCommit {
               message
@@ -134,7 +140,7 @@ export const usePullPageData = ({
           pullId: parseInt(pullId, 10),
         },
       }).then((res) => {
-        const parsedData = PullPageDataSchema.safeParse(res?.data?.owner)
+        const parsedData = PullPageDataSchema.safeParse(res?.data)
 
         if (!parsedData.success) {
           return Promise.reject({
@@ -145,14 +151,14 @@ export const usePullPageData = ({
 
         const data = parsedData.data
 
-        if (data?.repository?.__typename === 'NotFoundError') {
+        if (data?.owner?.repository?.__typename === 'NotFoundError') {
           return Promise.reject({
             status: 404,
             data: {},
           })
         }
 
-        if (data?.repository?.__typename === 'OwnerNotActivatedError') {
+        if (data?.owner?.repository?.__typename === 'OwnerNotActivatedError') {
           return Promise.reject({
             status: 403,
             data: {
@@ -169,11 +175,7 @@ export const usePullPageData = ({
         }
 
         return {
-          hasAccess: userHasAccess({
-            privateRepo: data?.repository?.private,
-            isCurrentUserPartOfOrg: data?.isCurrentUserPartOfOrg,
-          }),
-          pull: data?.repository?.pull,
+          pull: data?.owner?.repository?.pull ?? null,
         }
       }),
   })

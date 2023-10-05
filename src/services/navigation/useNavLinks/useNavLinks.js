@@ -15,8 +15,11 @@ export function useNavLinks() {
   return {
     signOut: {
       text: 'Sign Out',
-      path: ({ provider = p } = { provider: p }) =>
-        `${config.BASE_URL}/logout/${provider}`,
+      path: ({ provider = p, to } = { provider: p }) => {
+        const query = qs.stringify({ to }, { addQueryPrefix: true })
+
+        return `${config.API_URL}/logout/${provider}${query}`
+      },
       isExternalLink: true,
     },
     signIn: {
@@ -29,7 +32,7 @@ export function useNavLinks() {
           },
           { addQueryPrefix: true }
         )
-        return `${config.BASE_URL}/login/${provider}${query}`
+        return `${config.API_URL}/login/${provider}${query}`
       },
       isExternalLink: true,
     },
@@ -174,40 +177,52 @@ export function useNavLinks() {
     },
     treeView: {
       path: (
-        { provider = p, owner = o, repo = r, tree, ref } = {
+        { provider = p, owner = o, repo = r, tree, ref, ...queryParams } = {
           provider: p,
           owner: o,
           repo: r,
+          queryParams: {},
         }
       ) => {
+        let query = ''
+        if (Object.keys(queryParams).length > 0) {
+          query = qs.stringify(queryParams, { addQueryPrefix: true })
+        }
+
         if (ref) {
           const encodedRef = encodeURIComponent(ref)
 
           if (tree) {
             const encodedTree = encodeURIComponent(tree)
-            return `/${provider}/${owner}/${repo}/tree/${encodedRef}/${encodedTree}`
+            return `/${provider}/${owner}/${repo}/tree/${encodedRef}/${encodedTree}${query}`
           }
 
-          return `/${provider}/${owner}/${repo}/tree/${encodedRef}/`
+          return `/${provider}/${owner}/${repo}/tree/${encodedRef}/${query}`
         }
 
-        return `/${provider}/${owner}/${repo}/tree/`
+        return `/${provider}/${owner}/${repo}/tree/${query}`
       },
       isExternalLink: false,
       text: 'Tree View',
     },
     fileViewer: {
       path: (
-        { provider = p, owner = o, repo = r, ref, tree } = {
+        { provider = p, owner = o, repo = r, ref, tree, ...queryParams } = {
           provider: p,
           owner: o,
           repo: r,
+          queryParams: {},
         }
       ) => {
         const encodedRef = encodeURIComponent(ref)
         const encodedTree = encodeURIComponent(tree)
 
-        return `/${provider}/${owner}/${repo}/blob/${encodedRef}/${encodedTree}`
+        let query = ''
+        if (Object.keys(queryParams).length > 0) {
+          query = qs.stringify(queryParams, { addQueryPrefix: true })
+        }
+
+        return `/${provider}/${owner}/${repo}/blob/${encodedRef}/${encodedTree}${query}`
       },
       isExternalLink: false,
       text: 'File Viewer',
@@ -363,17 +378,6 @@ export function useNavLinks() {
         }
       ) => `/${provider}/${owner}/${repo}/settings/badge`,
       text: 'Badges & Graphs',
-    },
-    feedback: {
-      text: 'Feedback',
-      path: ({ provider = p, ref } = { provider: p, ref: null }) => {
-        if (ref) {
-          const encodedRef = encodeURIComponent(ref)
-          return `/${provider}/feedback?ref=${encodedRef}`
-        }
-        return `/${provider}/feedback`
-      },
-      isExternalLink: false,
     },
     prevLink: {
       text: 'Back',

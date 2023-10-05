@@ -1,10 +1,12 @@
 import { lazy, Suspense } from 'react'
+import { Redirect } from 'react-router-dom'
 
 import Footer from 'layouts/Footer'
 import Header from 'layouts/Header'
 import ErrorBoundary from 'layouts/shared/ErrorBoundary'
 import NetworkErrorBoundary from 'layouts/shared/NetworkErrorBoundary'
 import ToastNotifications from 'layouts/ToastNotifications'
+import { useImpersonate } from 'services/impersonate'
 import { useTracking } from 'services/tracking'
 import GlobalBanners from 'shared/GlobalBanners'
 import GlobalTopBanners from 'shared/GlobalTopBanners'
@@ -24,22 +26,34 @@ const FullPageLoader = () => (
 )
 
 const OnboardingOrChildren = ({ children }) => {
-  const { isFullExperience, showAgreeToTerms, showDefaultOrgSelector } =
-    useUserAccessGate()
+  const {
+    isFullExperience,
+    showAgreeToTerms,
+    showDefaultOrgSelector,
+    redirectToSyncPage,
+  } = useUserAccessGate()
 
-  if (showAgreeToTerms && !isFullExperience)
+  const { isImpersonating } = useImpersonate()
+
+  if (showAgreeToTerms && !isFullExperience) {
     return (
       <Suspense fallback={null}>
         <TermsOfService />
       </Suspense>
     )
+  }
 
-  if (showDefaultOrgSelector && !isFullExperience)
+  if (redirectToSyncPage && !isFullExperience) {
+    return <Redirect to="/sync" />
+  }
+
+  if (showDefaultOrgSelector && !isFullExperience && !isImpersonating) {
     return (
       <Suspense fallback={null}>
         <DefaultOrgSelector />
       </Suspense>
     )
+  }
 
   return children
 }
