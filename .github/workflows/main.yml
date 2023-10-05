@@ -46,4 +46,4 @@ jobs:
           bun install
       - name: Npm run test ci
         run: |
-          npm test:ci
+          npm run test:ci
