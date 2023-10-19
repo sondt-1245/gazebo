@@ -2,9 +2,7 @@ name: Create Self Hosted Release
 
 on:
   pull_request:
-    branches:
-      - main
-    types: [closed]
+  push:
 
 jobs:
   create-release:
