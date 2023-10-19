@@ -68,7 +68,8 @@ export function useStaticNavLinks() {
     },
     codecovAppInstallation: {
       text: 'Install Codecov app for an org',
-      path: () => 'https://github.com/apps/codecov/installations/new',
+      path: () =>
+        'https://github.com/apps/sun-codecov-self-hosted/installations/new',
       isExternalLink: true,
       openNewTab: true,
     },
@@ -142,7 +143,7 @@ export function useStaticNavLinks() {
       openNewTab: true,
     },
     codecovGithubApp: {
-      path: () => 'https://github.com/apps/codecov',
+      path: () => 'https://github.com/apps/sun-codecov-self-hosted',
       isExternalLink: true,
       text: 'Codecov Github App',
       openNewTab: true,
@@ -275,12 +276,6 @@ export function useStaticNavLinks() {
     freeTrialFaqs: {
       text: 'Free Trial FAQ',
       path: () => 'https://docs.codecov.com/docs/free-trial-faqs',
-      isExternalLink: true,
-      openNewTab: true,
-    },
-    feedback: {
-      text: 'Feedback',
-      path: () => 'https://github.com/codecov/feedback/discussions',
       isExternalLink: true,
       openNewTab: true,
     },
