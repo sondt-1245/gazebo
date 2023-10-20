@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.3
-FROM oven/bun:alpine as bun
+FROM oven/bun:1.0.3-alpine as bun
 RUN apk -U add git
 RUN mkdir /home/workspace
 COPY package.json /home/workspace
